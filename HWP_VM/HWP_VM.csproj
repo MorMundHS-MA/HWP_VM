@@ -55,6 +55,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Assembler.cs" />
+    <Compile Include="AssemblerException.cs" />
+    <Compile Include="Op.cs" />
+    <Compile Include="VirtualMachine.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

@@ -7,6 +7,31 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="350" Width="525">
     <Grid>
-        
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <Button x:Name="BtnStep" Content="Step" HorizontalAlignment="Left" FontSize="16" Click="Step_Click"/>
+        </Grid>
+        <Grid Grid.Column="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <ListView x:Name="RegisterView" ItemsSource="{Binding RegisterInfo, Mode=OneWay}"/>
+            <Grid Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <TextBox x:Name="textBox" TextWrapping="NoWrap" Text="0" VerticalAlignment="Top" PreviewTextInput="textBox_PreviewTextInput" TextChanged="textBox_TextChanged"/>
+                <ListView x:Name="MemView" Grid.Row="1" ItemsSource="{Binding MemoryInfo, Mode=OneWay, StringFormat={}{0:X2}}"/>
+            </Grid>
+        </Grid>
     </Grid>
 </Window>
