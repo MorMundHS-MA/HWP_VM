@@ -11,8 +11,8 @@
     {
         private const ushort IndexRX = 0xF;
         private const ushort IndexRY = 0xF0;
-        private const ushort ToMem = 0x100;
-        private const ushort FromMem = 0x200;
+        private const ushort ToMem = 0x200;
+        private const ushort FromMem = 0x100;
 
         private const string ToMemToken = "ToMem";
         private const string FromMemToken = "FromMem";
@@ -66,6 +66,10 @@
                         else if (tokens[3] == FromMemToken)
                         {
                             this.FromMemFlag = true;
+                        }
+                        else
+                        {
+                            throw new FormatException($"Unknown MOV token {tokens[3]}.");
                         }
                     }
                     break;
@@ -161,7 +165,7 @@
             private set
             {
                 this.val &= unchecked((ushort)~ToMem);
-                this.val |= (byte)((value ? 1 : 0) << 9);
+                this.val |= (ushort)((value ? 1 : 0) << 9);
             }
         }
 
@@ -172,7 +176,7 @@
             private set
             {
                 this.val &= unchecked((ushort)~FromMem);
-                this.val |= (byte)((value ? 1 : 0) << 10);
+                this.val |= (ushort)((value ? 1 : 0) << 10);
             }
         }
 

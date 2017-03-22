@@ -28,7 +28,7 @@
         private byte[] memory;
         private Stack<ushort> stack;
         private ushort[] generalRegisters;
-        private int programCounter;
+        private ushort programCounter;
         private MachineState state;
 
         public MachineState State => this.state;
@@ -112,7 +112,7 @@
                     this.generalRegisters[op.IndexRegX] = this.stack.Pop();
                     break;
                 case OpCodes.JMP:
-                    this.programCounter = op.Value - 1;
+                    this.programCounter = (ushort)(op.Value - 1);
                     break;
                 case OpCodes.JIZ:
                     if (this.generalRegisters[0] == 0)
@@ -133,7 +133,7 @@
                         return;
                     }
 
-                    this.stack.Push(op.Value);
+                    this.stack.Push(programCounter);
                     JumpToAddress(op.Value);
                     break;
                 case OpCodes.RTS:
@@ -197,7 +197,7 @@
 
         private void JumpToAddress(int address)
         {
-            this.programCounter = address - 2;
+            this.programCounter = (ushort)(address - 2);
         }
     }
 }

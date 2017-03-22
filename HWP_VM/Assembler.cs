@@ -5,8 +5,7 @@
     using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
-
-
+    
     public static class Assembler
     {
         public static byte[] Assemble(string source)
