@@ -29,7 +29,7 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition/>
                 </Grid.RowDefinitions>
-                <TextBox x:Name="textBox" TextWrapping="NoWrap" Text="0" VerticalAlignment="Top" PreviewTextInput="textBox_PreviewTextInput" TextChanged="textBox_TextChanged"/>
+                <TextBox x:Name="MemViewOffset" TextWrapping="NoWrap" Text="0" VerticalAlignment="Top" PreviewTextInput="MemViewOffset_PreviewTextInput" TextChanged="MemViewOffset_TextChanged"/>
                 <ListView x:Name="MemView" Grid.Row="1" ItemsSource="{Binding MemoryInfo, Mode=OneWay, StringFormat={}{0:X2}}"/>
             </Grid>
         </Grid>

@@ -6,6 +6,7 @@ namespace HWP_VM
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.Globalization;
+    using System.IO;
     using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
@@ -32,39 +33,35 @@ namespace HWP_VM
         {
             InitializeComponent();
             this.DataContext = this;
-            vm = new VirtualMachine();
-            var test = @"
-LOAD 1
-MOV 1 0
-LOAD 2
-ADD 0 1
-RTS";
+            this.vm = new VirtualMachine();
+            var test = File.ReadAllText("asm/Fibonacci asm.txt");
             var asm = Assembler.Assemble(test);
-            vm.WriteMemory(0, asm);
+            this.vm.WriteMemory(0, asm);
         }
 
         private async void Step_Click(object sender, RoutedEventArgs e)
         {
             AllowRunButtons(false);
-            Task<ushort[]> step = new Task<ushort[]>(() =>
+            var step = new Task<ushort[]>(() =>
             {
-                lock (vm)
+                lock (this.vm)
                 {
-                    vm.Step();
-                    return vm.GetRegisters();
+                    this.vm.Step();
+                    return this.vm.GetRegisters();
                 }
             });
 
             step.Start();
             var regs = await step;
-            RegisterInfo.Clear();
-            RegisterInfo.Add($"State : {vm.State}");
-            RegisterInfo.Add($"PC : {vm.ProgramCounter}");
-            for (int i = 0; i < 16; i++)
+            this.RegisterInfo.Clear();
+            this.RegisterInfo.Add($"State : {vm.State}");
+            this.RegisterInfo.Add($"PC : {vm.ProgramCounter}");
+            this.RegisterInfo.Add($"Next Instr : {new Op(vm.ReadMemory(vm.ProgramCounter)).ToString()}");
+            for (var i = 0; i < 16; i++)
             {
-                RegisterInfo.Add($"R{i}:{regs[i]}");
+                this.RegisterInfo.Add($"R{i}:{regs[i]}");
             }
-            if (vm.State == VirtualMachine.MachineState.Ready)
+            if (this.vm.State == VirtualMachine.MachineState.Ready)
             {
                 AllowRunButtons(true);
             }
@@ -74,18 +71,17 @@ RTS";
         {
             if (allow)
             {
-                BtnStep.IsEnabled = true;
+                this.BtnStep.IsEnabled = true;
             }
             else
             {
-                BtnStep.IsEnabled = false;
+                this.BtnStep.IsEnabled = false;
             }
         }
 
-        private void textBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        private void MemViewOffset_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
-            int offset;
-            bool canParse = int.TryParse(e.Text, NumberStyles.HexNumber, CultureInfo.CurrentCulture, out offset);
+            var canParse = int.TryParse(e.Text, NumberStyles.HexNumber, CultureInfo.CurrentCulture, out var offset);
             if (!canParse)
             {
                 canParse = int.TryParse(e.Text, out offset);
@@ -98,33 +94,33 @@ RTS";
             }
         }
 
-        private async void textBox_TextChanged(object sender, TextChangedEventArgs e)
+        private async void MemViewOffset_TextChanged(object sender, TextChangedEventArgs e)
         {
-            if (vm == null)
+            if (this.vm == null)
             {
                 return;
             }
 
-            int offset;
-            bool canParse = int.TryParse(textBox.Text, NumberStyles.HexNumber, CultureInfo.CurrentCulture, out offset);
+            var canParse = int.TryParse(this.MemViewOffset.Text, NumberStyles.HexNumber, CultureInfo.CurrentCulture, out var offset);
             if (!canParse)
             {
-                canParse = int.TryParse(textBox.Text, out offset);
+                canParse = int.TryParse(this.MemViewOffset.Text, out offset);
             }
 
-            Task<byte[]> getMem = new Task<byte[]>(() =>
+            var getMem = new Task<byte[]>(() =>
             {
-                lock (vm)
+                lock (this.vm)
                 {
-                    return vm.ReadMemory(offset, vm.MemorySize - offset);
+                    return this.vm.ReadMemory(offset, this.vm.MemorySize - offset);
                 }
             });
+
             getMem.Start();
             var mem = await getMem;
-            MemoryInfo.Clear();
+            this.MemoryInfo.Clear();
             foreach (var b in mem)
             {
-                MemoryInfo.Add(b);
+                this.MemoryInfo.Add(b);
             }
         }
     }

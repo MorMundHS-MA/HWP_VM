@@ -23,20 +23,21 @@
         public Op(string sourceLine)
         {
             var tokens = sourceLine.Split(' ');
-            if (!Enum.TryParse(tokens[0], out opCode))
+            if (!Enum.TryParse(tokens[0], out this.opCode))
             {
                 throw new FormatException($"Unknown OP code in \"{sourceLine}\".");
             }
 
-            val = 0;
+            this.val = 0;
 
             if (tokens[0] == "MOD")
             {
                 tokens[0] = "DIV";
-                ToMemFlag = true;
+                this.ToMemFlag = true;
             }
-            int expectedTokenCount = 1;
-            switch (opCode)
+
+            var expectedTokenCount = 1;
+            switch (this.opCode)
             {
                 case VirtualMachine.OpCodes.NOP:
                 case VirtualMachine.OpCodes.RTS:
@@ -46,7 +47,7 @@
                 case VirtualMachine.OpCodes.JIH:
                 case VirtualMachine.OpCodes.JSR:
                 case VirtualMachine.OpCodes.LOAD:
-                    val = ushort.Parse(tokens[1]);
+                    this.val = ushort.Parse(tokens[1], System.Globalization.NumberStyles.HexNumber);
                     expectedTokenCount = 2;
                     break;
                 case VirtualMachine.OpCodes.MOV:
@@ -60,11 +61,11 @@
                         expectedTokenCount = 4;
                         if (tokens[3] == ToMemToken)
                         {
-                            ToMemFlag = true;
+                            this.ToMemFlag = true;
                         }
                         else if (tokens[3] == FromMemToken)
                         {
-                            FromMemFlag = true;
+                            this.FromMemFlag = true;
                         }
                     }
                     break;
@@ -103,7 +104,7 @@
 
             this.opCode = (VirtualMachine.OpCodes)opCode;
 
-            if (this.opCode == VirtualMachine.OpCodes.MOV && ToMemFlag && FromMemFlag)
+            if (this.opCode == VirtualMachine.OpCodes.MOV && this.ToMemFlag && this.FromMemFlag)
             {
                 throw new ArgumentException("False MOV flag usage.");
             }
@@ -115,34 +116,18 @@
 
         }
 
-        public VirtualMachine.OpCodes OpCode { get { return opCode; } }
-
-        public byte OpCodeBin
-        {
-            get
-            {
-                return (byte)opCode;
-            }
-        }
+        public VirtualMachine.OpCodes OpCode => this.opCode;
+        public byte OpCodeBin => (byte)this.opCode;
 
         public ushort Value
         {
-            get
-            {
-                return val;
-            }
-            private set
-            {
-                val = value;
-            }
+            get => this.val;
+            private set => this.val = value;
         }
 
         public byte IndexRegX
         {
-            get
-            {
-                return (byte)((val & IndexRX));
-            }
+            get => (byte)((this.val & IndexRX));
 
             private set
             {
@@ -150,96 +135,80 @@
                 {
                     throw new ArgumentException();
                 }
-                val &= unchecked((ushort)~IndexRX);
-                val |= (byte)(value);
+                this.val &= unchecked((ushort)~IndexRX);
+                this.val |= (byte)(value);
             }
         }
 
         public byte IndexRegY
         {
-            get
-            {
-                return (byte)((val & IndexRY) >> 4);
-            }
+            get => (byte)((this.val & IndexRY) >> 4);
             private set
             {
                 if (value > 0xF)
                 {
                     throw new ArgumentException();
                 }
-                val &= unchecked((ushort)~IndexRY);
-                val |= (byte)(value << 4);
+                this.val &= unchecked((ushort)~IndexRY);
+                this.val |= (byte)(value << 4);
             }
         }
 
         public bool ToMemFlag
         {
-            get
-            {
-                return (val & ToMem) == ToMem;
-            }
+            get => (this.val & ToMem) == ToMem;
 
             private set
             {
-                val &= unchecked((ushort)~ToMem);
-                val |= (byte)((value ? 1 : 0) << 9);
+                this.val &= unchecked((ushort)~ToMem);
+                this.val |= (byte)((value ? 1 : 0) << 9);
             }
         }
 
         public bool FromMemFlag
         {
-            get
-            {
-                return
-                    (val & FromMem) == FromMem;
-            }
+            get => (this.val & FromMem) == FromMem;
 
             private set
             {
-                val &= unchecked((ushort)~FromMem);
-                val |= (byte)((value ? 1 : 0) << 10);
+                this.val &= unchecked((ushort)~FromMem);
+                this.val |= (byte)((value ? 1 : 0) << 10);
             }
         }
 
-        public ushort BinaryOp
-        {
-            get
-            {
-                return (ushort)(OpCodeBin | (val << 4));
-            }
-        }
+        public ushort BinaryOp => (ushort)(this.OpCodeBin | (this.val << 4));
 
         public void ToBinaryOp(out byte b1, out byte b2)
         {
-            b1 = (byte)(BinaryOp >> 8);
-            b2 = (byte)(BinaryOp & 0xFF);
+            b1 = (byte)(this.BinaryOp >> 8);
+            b2 = (byte)(this.BinaryOp & 0xFF);
         }
 
         public override string ToString()
         {
-            StringBuilder opStr = new StringBuilder();
-            if (opCode == VirtualMachine.OpCodes.DIV && ToMemFlag)
+            var opStr = new StringBuilder();
+            if (this.opCode == VirtualMachine.OpCodes.DIV && this.ToMemFlag)
             {
                 opStr.Append("MOD");
             }
             else
             {
-                opStr.Append(opCode.ToString());
+                opStr.Append(this.opCode.ToString());
             }
 
             opStr.Append(" ");
-            switch (opCode)
+            switch (this.opCode)
             {
                 case VirtualMachine.OpCodes.RTS:
                 case VirtualMachine.OpCodes.NOP:
                     break;
                 case VirtualMachine.OpCodes.MOV:
                     opStr.Append($"{IndexRegX:X} {IndexRegY:X} ");
-                    if (ToMemFlag)
+                    if (this.ToMemFlag)
                     {
                         opStr.Append(ToMemToken);
                     }
-                    else if (FromMemFlag)
+                    else if (this.FromMemFlag)
                     {
                         opStr.Append(FromMemToken);
                     }
@@ -270,13 +239,13 @@
 
         private void SetRegisterIndices(string rx, string ry = null)
         {
-            IndexRegX = byte.Parse(rx);
+            this.IndexRegX = byte.Parse(rx);
             if (!string.IsNullOrWhiteSpace(ry))
             {
-                IndexRegY = byte.Parse(ry);
+                this.IndexRegY = byte.Parse(ry);
             }
 
-            if (IndexRegX > 0xF || IndexRegY > 0xF)
+            if (this.IndexRegX > 0xF || this.IndexRegY > 0xF)
             {
                 throw new InvalidOperationException("Register Index out of bounds!");
             }
