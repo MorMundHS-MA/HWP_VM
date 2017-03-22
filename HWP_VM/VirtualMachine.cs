@@ -133,7 +133,7 @@
                         return;
                     }
 
-                    this.stack.Push(programCounter);
+                    this.stack.Push(this.programCounter);
                     JumpToAddress(op.Value);
                     break;
                 case OpCodes.RTS:
