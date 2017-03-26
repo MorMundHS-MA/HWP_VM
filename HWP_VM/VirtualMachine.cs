@@ -114,7 +114,7 @@
                     this.generalRegisters[op.IndexRegX] = this.stack.Pop();
                     break;
                 case OpCodes.JMP:
-                    this.programCounter = (ushort)(op.Value - 1);
+                    JumpToAddress(op.Value);
                     break;
                 case OpCodes.JIZ:
                     if (this.generalRegisters[0] == 0)
@@ -135,7 +135,7 @@
                         return;
                     }
 
-                    this.stack.Push(this.programCounter);
+                    this.stack.Push((ushort)(this.programCounter + 2));
                     JumpToAddress(op.Value);
                     break;
                 case OpCodes.RTS:
@@ -160,6 +160,7 @@
             this.memory = new byte[defaultMemSize];
             this.generalRegisters = new ushort[defaultRegisterCnt];
             this.stack = new Stack<ushort>(defaultStackSize);
+            this.programCounter = 0;
         }
 
         public void WriteMemory(int offset, byte[] data)

@@ -1,59 +1,114 @@
-LOAD 14 ; R0 = 20
-MOV 4 0; n(R4) = 20
+;//ushort fibTable[20];
+;//Fibonacci(20);
+LOAD 14 ;  R0 = 20
+MOV 4 0 ;  n <=> R4 = 20
 JSR Fibonacci
-;int(R0) Fibonacci(int n(R4))
+;//ushort Fibonacci(ushort n)
 LABEL Fibonacci
-;n => R4
+;n <=> R4
 ;save n
 PUSH 4
-;int fib = 0
-;fib => R3
+;//{
+;//	ushort fib = 0, fib1,fib2;
+;// ret = R0, fib = R1, fib1 = R2, fib2 = R3,n = R4
 LOAD 0 ; R0 = 0
-MOV 3 0 ; R3 = 0
-; n => R0
-MOV 0 4
-;if (n > 0)
-JIZ ElifGZ
-; n - 1 => R1
-; 1 => R0
-MOV 1 0
-LOAD 1 ;R0 = 1
-SUB 1 0
-; n - 1 => R0
-MOV 0 1
-;if(n == 1)
-JIZ NIsOne
-; n - 2 => R2
+;// fib = 0
+MOV 1 0 ; fib <=> R3 = 0
+;//	if (n != 0)
+MOV 0 4; n <=> R4 => R0
+JIZ ElifGZ ; Jump to endif if n = 0
+;//	{	
+;//		if (n != 1)
+;//		{
 LOAD 1 ; R0 = 1
-MOV 2 1 ; R2 = n - 1
-SUB 2 0 ; R2 = n - 2
-; Save n -2
-PUSH 2
-;Fibonacci(n - 1)
-MOV 4 1
+MOV 5 0	; R5 = 1
+MOV 0 4 ; R0 = n
+SUB 0 5 ; R0 = n - 1
+JIZ NIsOne ; Jump to else if n = 1
+PUSH 0 ; Save n - 1
+MOV 7 0 ; R7 = n - 1
+;//			if(fibTable[n - 1] != 0)
+;//			{
+MOV 5 0 ; GetTabAddress(n = n - 1)
+JSR GetTabAddress ; R0 = table address
+MOV 5 0 ; R5 = tableAddress
+MOV 0 5 FromMem ; R0 = [R5]
+JIZ TabM1IsNull
+;//				fib1 = fibTable[n - 1];		
+MOV 2 0 ; fib1 = R0
+JMP TabM1Elif ; goto elif
+;//			}
+;//			else
+;//			{
+LABEL TabM1IsNull
+;//				fib1 = Fibonacci(n - 1);
+MOV 4 7 ; R4 <=> n = n - 1	
 JSR Fibonacci
-; restore (n -2) as R4(param)
-POP 4
-; save RO(result)
-PUSH 0
-;Fibonacci(n - 2)
+MOV 2 0 ; fib1 = R0 <=> ret
+;//			}
+LABEL TabM1Elif
+;//
+LOAD 1 ; R0 = 1
+MOV 5 0	; R5 = 1
+POP 0 ; R0 = load n - 1
+SUB 0 5 ; R0 = n - 2
+PUSH 0 ; Save n - 2
+;//			if (fibTable[n - 2] != 0)
+;//			{
+MOV 5 0 ; GetTabAddress(R5 <=> n = n - 2)
+JSR GetTabAddress ; R0 = table address
+MOV 5 0 ; R5 = tableAddress
+MOV 0 5 FromMem ; R0 = [R5]
+JIZ TabM2IsNull
+;//				fib2 = fibTable[n - 2];
+MOV 2 0 ; fib1 = R0
+JMP TabM2Elif ; goto elif
+;//			}
+;//			else
+;//			{
+LABEL TabM2IsNull
+;//				fib2 = Fibonacci(n - 2);
+POP 4 ; R4 <=> n = n - 2
+PUSH 2 ; Save fib1
 JSR Fibonacci
-; restore result in R3(fib)
-POP 3
-; fib = Fibonacci(n - 1) + Fibonacci(n - 2);
-ADD 3 0
-LABEL NIsOne ; End if => if (n == 1)
-;fib(R3) = 1
-LOAD 1 ; RO = 1
-MOV 3 0 ; R3 = 1
-LABEL ElifGZ ; End if => if (n > 0)
-;*(1000 + (n * 4)) get address
-LOAD 2 ; R0 = 2
-; Restore n in R4
-POP 4
-MUL 4 0 ; R4 = n * 2
-LOAD 3E8 ; R0 = 1000
-ADD 4 0 ; R4 = (1000 + (n * 4))
-MOV 4 3 ToMem ; *(1000 + (n * 4)) = fib;
-MOV 0 3 ; Return value = fib
+MOV 3 0 ; fib2 = R0 <=> ret
+POP 2 ; Load fib1
+;//			}
+LABEL TabM2Elif
+;//			fib = fib1 + fib2;
+ADD 2 3 ; fib1 = fib1 + fib2
+MOV 1 2 ; fib = fib1 + fib2
+JMP ElifGZ ; goto elif
+;//		}
+;//		else
+;//		{
+LABEL NIsOne
+;//			fib = 1;
+LOAD 1 ; R0 = 1
+MOV 1 0 ; fib <=> R1 = 1
+;//		}
+;//	}
+LABEL ElifGZ ; Endif => if (n > 0)
+;//	
+;//	fibTable[n] = fib;
+POP 5 ; Load n
+JSR GetTabAddress ; R0 = ret
+MOV 0 1 ToMem ; fibTable[n] = fib;
+;//	return fib;
+MOV 0 1 ; ret = fib
+RTS 
+;//}
+;// ushort GetTabAddress(int n)
+;//{
+LABEL GetTabAddress
+; ret <=> R0
+; n <=> R5
+; offset <=> R6
+;//	 return 1000 + n*2;
+LOAD 2 ; R0 = 2 <=> sizeof(uint) 
+MOV 6 0 ; R6 <=> offset =  sizeof(uint)
+MUL 6 5 ; R6 = 2 * n
+LOAD 3E8 ; R0 = fibTable @ 1000/0x3E8
+ADD 0 6 ; R0 = fibTable + offset
 RTS
+;//}

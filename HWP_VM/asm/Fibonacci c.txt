@@ -1,17 +1,39 @@
-int Fibonacci(int n)
+ushort fibTable[20];
+Fibonacci(20);
+
+ushort Fibonacci(ushort n)
 {
-	int fib = 0;
-	if (n > 0)
+	ushort fib = 0, fib1,fib2;
+	if (n != 0)
 	{	
-		else if (n == 1)
+		if (n != 1)
 		{
 			fib = 1;
 		}
 		else
 		{
-			fib = Fibonacci(n - 1) + Fibonacci(n - 2);
+			if(fibTable[n - 1] == 0)
+			{
+				fib1 = Fibonacci(n - 1);				
+			}
+			else
+			{
+				fib1 = fibTable[n - 1];
+			}
+
+			if (fibTable[n - 2] == 0)
+			{
+				fib2 = Fibonacci(n - 2);
+			}
+			else
+			{
+				fib2 = fibTable[n - 2];
+			}
+
+			fib = fib1 + fib2;			
 		}
 	}
 	
+	fibTable[n] = fib;
 	return fib;
 }

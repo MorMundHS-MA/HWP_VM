@@ -130,6 +130,10 @@ namespace HWP_VM
 
             var regs = await reset;
             SetRegisterInfo(regs);
+            foreach (var dbg in this.DebugInfo)
+            {
+                dbg.ProfilerHitCount = 0;
+            }
 
             if (this.vm.State == VirtualMachine.MachineState.Ready)
             {
@@ -174,7 +178,7 @@ namespace HWP_VM
 
             this.DebugInfo.Clear();
             this.profiler = new Profiler();
-            var i = 0;
+            var i = -2; // For zero based numbering
             disasm.ForEach(op => this.DebugInfo.Add(new DebugLine(op.ToString(), i += 2, this.profiler)));
             this.isVmInitialized = true;
         }

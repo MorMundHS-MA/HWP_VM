@@ -176,7 +176,7 @@
             private set
             {
                 this.val &= unchecked((ushort)~FromMem);
-                this.val |= (ushort)((value ? 1 : 0) << 10);
+                this.val |= (ushort)((value ? 1 : 0) << 8);
             }
         }
 
