@@ -57,6 +57,9 @@ namespace HWP_VM
             this.RegisterInfo.Add($"State : {vm.State}");
             this.RegisterInfo.Add($"PC : {vm.ProgramCounter}");
             this.RegisterInfo.Add($"Next Instr : {new Op(vm.ReadMemory(vm.ProgramCounter)).ToString()}");
+            this.RegisterInfo.Add($"Stack ptr : {vm.StackSize}");
+            this.RegisterInfo.Add($"Stack top : {(vm.StackSize != 0 ? vm.StackTop.ToString() : "Empty")}");
+
             for (var i = 0; i < 16; i++)
             {
                 this.RegisterInfo.Add($"R{i}:{regs[i]}");

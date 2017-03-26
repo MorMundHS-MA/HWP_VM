@@ -10,9 +10,9 @@ PUSH 4
 ;fib => R3
 LOAD 0 ; R0 = 0
 MOV 3 0 ; R3 = 0
-;if (n > 0)
 ; n => R0
 MOV 0 4
+;if (n > 0)
 JIZ ElifGZ
 ; n - 1 => R1
 ; 1 => R0
@@ -48,10 +48,10 @@ LOAD 1 ; RO = 1
 MOV 3 0 ; R3 = 1
 LABEL ElifGZ ; End if => if (n > 0)
 ;*(1000 + (n * 4)) get address
-LOAD 4 ; R0 = 4
+LOAD 2 ; R0 = 2
 ; Restore n in R4
 POP 4
-MUL 4 0 ; R4 = n * 4
+MUL 4 0 ; R4 = n * 2
 LOAD 3E8 ; R0 = 1000
 ADD 4 0 ; R4 = (1000 + (n * 4))
 MOV 4 3 ToMem ; *(1000 + (n * 4)) = fib;

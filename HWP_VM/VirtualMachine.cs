@@ -34,6 +34,8 @@
         public MachineState State => this.state;
         public int ProgramCounter => this.programCounter;
         public int MemorySize => this.memory.Length;
+        public int StackSize => this.stack.Count;
+        public ushort StackTop => this.stack.Peek();
         public VirtualMachine()
         {
             Reset();
