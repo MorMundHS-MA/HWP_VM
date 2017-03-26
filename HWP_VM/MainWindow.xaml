@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:HWP_VM"
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="525">
+        Title="MainWindow" Height="400" Width="700">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>
@@ -16,7 +16,50 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition/>
             </Grid.RowDefinitions>
-            <Button x:Name="BtnStep" Content="Step" HorizontalAlignment="Left" FontSize="16" Click="Step_Click"/>
+            <Grid Background="DarkGray">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <Button x:Name="BtnStep" Grid.Column="0" Content="Step" HorizontalAlignment="Left" IsEnabled="False" FontSize="16" Click="Step_Click"/>
+                <Button x:Name="BtnRun" Grid.Column="1" Content="Run" HorizontalAlignment="Left" IsEnabled="False" FontSize="16" Click="Run_Click"/>
+                <Button x:Name="BtnReset" Grid.Column="2" Content="Reset" HorizontalAlignment="Left" IsEnabled="False" FontSize="16" Click="Reset_Click"/>
+                <Button x:Name="BtnLoadSrc" Grid.Column="3" Content="Load" HorizontalAlignment="Left" FontSize="16" Click="Load_Click"/>
+                <Button x:Name="BtnSaveSrc" Grid.Column="4" Content="Save" HorizontalAlignment="Left"  IsEnabled="False" FontSize="16" Click="Save_Click"/>
+                <Button x:Name="BtnExport" Grid.Column="5" Content="Import" HorizontalAlignment="Left"  IsEnabled="False" FontSize="16" Click="Export_Click"/>
+                <Button x:Name="BtnImport" Grid.Column="6" Content="Export" HorizontalAlignment="Left"  IsEnabled="False" FontSize="16" Click="Import_Click"/>
+            </Grid>
+            <TabControl Grid.Row="1" >
+                <TabItem Header="Source Code">
+                    <TextBox x:Name="ViewSrc" TextWrapping="Wrap">
+
+                    </TextBox>
+                </TabItem>
+                <TabItem Header="Debug">
+                    <DataGrid ItemsSource="{Binding DebugInfo}" AutoGenerateColumns="False" CanUserResizeRows="False" CanUserReorderColumns="False" CanUserSortColumns="False">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="#" Binding="{Binding LineNumber,Mode=OneWay}"/>
+                            <DataGridTextColumn  Width="30" Binding="{Binding ProfilerPercentage,Mode=OneWay}"/>
+                            <DataGridCheckBoxColumn Header="BP" Binding="{Binding HasBreakpoint, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
+                            <DataGridTextColumn Width="*" Header="Disassembly" Binding="{Binding SourceLine,Mode=OneWay}"/>
+                        </DataGrid.Columns>
+                        <DataGrid.RowStyle>
+                            <Style TargetType="DataGridRow">
+                                <Setter Property="Background">
+                                    <Setter.Value>
+                                        <SolidColorBrush Color="{Binding ProfilerPercentageColor}"/>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </DataGrid.RowStyle>
+                    </DataGrid>
+                </TabItem>
+            </TabControl>
         </Grid>
         <Grid Grid.Column="1">
             <Grid.ColumnDefinitions>

@@ -5,10 +5,10 @@
     using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
-    
+
     public static class Assembler
     {
-        public static byte[] Assemble(string source)
+        public static byte[] Assemble(string source, out List<Op> disasm)
         {
             var lines = source.Split('\r', '\n');
             var labels = new Dictionary<string, Label>();
@@ -90,6 +90,7 @@
             CompleteCurrentLabel(labels, currentLabel, lines.Length - currentLabel.line, ref currentAsmSize, ref currentBinPos);
 
             var image = new byte[currentBinPos];
+            disasm = new List<Op>();
             foreach (var label in labels.Values)
             {
                 byte[] bin;
@@ -99,14 +100,14 @@
                 }
                 else
                 {
-                    var asm = lines
+                    var asmSrc = lines
                         .Skip(label.StartLine)
                         .Take(label.SourceLength)
                         .Select(t => RemoveComments(t))
                         .Where(t => !string.IsNullOrWhiteSpace(RemoveComments(t)))
                         .Select(line =>
                         {
-                            return line                            
+                            return line
                             .Split(' ')
                             .Where(t => !string.IsNullOrWhiteSpace(t))
                             .Select((t, i) =>
@@ -125,7 +126,15 @@
                             .Aggregate((s1, s2) => s1 + ' ' + s2);
                         });
 
-                    bin = AssembleBlock(asm);
+                    var asm = AssembleBlock(asmSrc);
+                    disasm.AddRange(asm);
+                    bin = new byte[asm.Count * 2];
+                    for (var i = 0; i < asm.Count; i++)
+                    {
+                        asm[i].ToBinaryOp(out var b1, out var b2);
+                        bin[i * 2] = b1;
+                        bin[(i * 2) + 1] = b2;
+                    }
                 }
 
                 Array.Copy(bin, 0, image, label.Pos, bin.Length);
@@ -134,23 +143,9 @@
             return image;
         }
 
-        public static byte[] AssembleBlock(IEnumerable<string> asmOnlySource)
+        public static List<Op> AssembleBlock(IEnumerable<string> asmOnlySource)
         {
-            var asm = new List<byte>();
-            foreach (var line in asmOnlySource)
-            {
-                if (string.IsNullOrWhiteSpace(line))
-                {
-                    continue;
-                }
-
-                var op = new Op(line);
-                op.ToBinaryOp(out var b1, out var b2);
-                asm.Add(b1);
-                asm.Add(b2);
-            }
-
-            return asm.ToArray();
+            return asmOnlySource.Select(s => new Op(s)).ToList();
         }
 
         public static string DisassembleBlock(byte[] binary)
