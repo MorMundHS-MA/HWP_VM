@@ -145,6 +145,7 @@ namespace HWP_VM
         {
             AllowIOButtons(false);
             AllowRunButtons(false);
+            this.vm.Reset();
             this.ViewSrc.Text = await Task.Run(() => File.ReadAllText(defSrcPath));
             AllowIOButtons(true);
             AllowRunButtons(true);

@@ -3,6 +3,7 @@
 LOAD 14 ;  R0 = 20
 MOV 4 0 ;  n <=> R4 = 20
 JSR Fibonacci
+RTS ; End Program
 ;//ushort Fibonacci(ushort n)
 LABEL Fibonacci
 ;n <=> R4
@@ -28,12 +29,12 @@ JIZ NIsOne ; Jump to else if n = 1
 PUSH 0 ; Save n - 1
 MOV 7 0 ; R7 = n - 1
 ;//			if(fibTable[n - 1] != 0)
-;//			{
 MOV 5 0 ; GetTabAddress(n = n - 1)
 JSR GetTabAddress ; R0 = table address
 MOV 5 0 ; R5 = tableAddress
 MOV 0 5 FromMem ; R0 = [R5]
 JIZ TabM1IsNull
+;//			{
 ;//				fib1 = fibTable[n - 1];		
 MOV 2 0 ; fib1 = R0
 JMP TabM1Elif ; goto elif
@@ -52,23 +53,22 @@ LOAD 1 ; R0 = 1
 MOV 5 0	; R5 = 1
 POP 0 ; R0 = load n - 1
 SUB 0 5 ; R0 = n - 2
-PUSH 0 ; Save n - 2
+MOV 4 0 ; R4 = n - 2
 ;//			if (fibTable[n - 2] != 0)
-;//			{
 MOV 5 0 ; GetTabAddress(R5 <=> n = n - 2)
 JSR GetTabAddress ; R0 = table address
 MOV 5 0 ; R5 = tableAddress
 MOV 0 5 FromMem ; R0 = [R5]
 JIZ TabM2IsNull
+;//			{
 ;//				fib2 = fibTable[n - 2];
-MOV 2 0 ; fib1 = R0
+MOV 3 0 ; fib2 = R0
 JMP TabM2Elif ; goto elif
 ;//			}
 ;//			else
 ;//			{
 LABEL TabM2IsNull
 ;//				fib2 = Fibonacci(n - 2);
-POP 4 ; R4 <=> n = n - 2
 PUSH 2 ; Save fib1
 JSR Fibonacci
 MOV 3 0 ; fib2 = R0 <=> ret

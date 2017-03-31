@@ -57,7 +57,10 @@
                     this.generalRegisters[0] = op.Value;
                     break;
                 case OpCodes.MOV:
-                    if (op.ToMemFlag && op.FromMemFlag)
+                    if 
+                        (op.ToMemFlag && op.FromMemFlag ||
+                        (op.ToMemFlag && this.generalRegisters[op.IndexRegX] > this.memory.Length) ||
+                        (op.FromMemFlag && this.generalRegisters[op.IndexRegY] > this.memory.Length))
                     {
                         this.state = MachineState.Exception;
                         return;
