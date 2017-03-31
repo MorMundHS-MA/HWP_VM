@@ -59,13 +59,13 @@ namespace HWP_VM
                 lock (this.vm)
                 {
                     this.vm.Step();
+                    this.profiler.Step(this.vm.ProgramCounter);
                     return this.vm.GetRegisters();
                 }
             });
 
             var regs = await step;
             SetRegisterInfo(regs);
-            this.profiler.Step();
             this.DebugInfo[currentLine].ProfilerHitCount++;
 
             if (this.vm.State == VirtualMachine.MachineState.Ready)
@@ -98,7 +98,7 @@ namespace HWP_VM
                     {
                         firstLoop = false;
                         profilerCache[this.vm.ProgramCounter / 2]++;
-                        this.profiler.Step();
+                        this.profiler.Step(this.vm.ProgramCounter);
                         this.vm.Step();
                     }
 
@@ -289,7 +289,7 @@ namespace HWP_VM
 
         public class DebugLine : INotifyPropertyChanged
         {
-            private Func<int> GetProfileTotal;
+            private Profiler profiler;
             private bool hasBreakPoint;
             private string source;
             private int profilerHitCount;
@@ -336,14 +336,15 @@ namespace HWP_VM
             }
 
 
-            public double ProfilerPercentage => ((double)this.ProfilerHitCount / Math.Max(1, this.GetProfileTotal())) * 100;
+            public double ProfilerPercentage => ((double)this.ProfilerHitCount / Math.Max(1, this.profiler.ProfilerTotal)) * 100;
             public Color ProfilerPercentageColor
             {
                 get
                 {
                     if (this.profilerHitCount > 0)
                     {
-                        var hue = Lerp(0.33, 0, this.ProfilerPercentage / 100);
+                        var redHitCount = (this.profiler.ProfilerTotal * 3) / this.profiler.ExecutedAddressesTotal;
+                        var hue = Lerp(0.33, 0, (double)this.profilerHitCount / redHitCount);
                         return FromHSLA(hue, 0.5, 0.5, 1);
                     }
                     else
@@ -367,7 +368,7 @@ namespace HWP_VM
 
             public DebugLine(string sourceLine, int lineNumber, Profiler profiler)
             {
-                this.GetProfileTotal = profiler.GetProfilerTotal;
+                this.profiler = profiler;
                 this.lineNumber = lineNumber;
                 this.HasBreakpoint = false;
                 this.SourceLine = sourceLine;
@@ -387,7 +388,6 @@ namespace HWP_VM
 
             private void HitCountChanged()
             {
-
                 OnPropertyChanged("ProfilerPercentage");
                 OnPropertyChanged("ProfilerPercentageColor");
             }
@@ -396,16 +396,24 @@ namespace HWP_VM
         public class Profiler : INotifyPropertyChanged
         {
             private int profilerTotal;
+            private HashSet<int> executedAddresses = new HashSet<int>();
             public int ProfilerTotal => this.profilerTotal;
+            public int ExecutedAddressesTotal => this.executedAddresses.Count;            
 
             public event PropertyChangedEventHandler PropertyChanged;
             public int GetProfilerTotal()
             {
                 return this.profilerTotal;
             }
-            public void Step()
+
+            public void Step(int programCounter)
             {
                 this.profilerTotal++;
+                if (this.executedAddresses.Add(programCounter))
+                {
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ExecutedAddressesTotal"));
+                } 
+
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ProfilerTotal"));
             }
         }
