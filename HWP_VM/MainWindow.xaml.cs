@@ -91,8 +91,12 @@ namespace HWP_VM
             {
                 lock (this.vm)
                 {
-                    while (this.vm.State == VirtualMachine.MachineState.Ready && !breakpointCache[this.vm.ProgramCounter / 2])
+                    var firstLoop = true;
+                    while (
+                        this.vm.State == VirtualMachine.MachineState.Ready && 
+                        (firstLoop || !breakpointCache[this.vm.ProgramCounter / 2]))
                     {
+                        firstLoop = false;
                         profilerCache[this.vm.ProgramCounter / 2]++;
                         this.profiler.Step();
                         this.vm.Step();
